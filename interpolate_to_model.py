@@ -40,25 +40,32 @@ def read_model_file(path):
 #
 def read_viirs_file(path):
     with nc.Dataset(path) as ds:
-        # Check if the required variable exists
-        if "Spectral_Aerosol_Optical_Thickness_Land" not in ds.variables:
-            print(f"    Skipping {os.path.basename(path)}: variable not found")
-            return None, None, None
-        aod = ds.variables["Spectral_Aerosol_Optical_Thickness_Land"][:]
+        # Check if required AOD variables are present
+        required_vars = [
+            "Aerosol_Optical_Thickness_550_Land_Ocean",
+            "Aerosol_Optical_Thickness_550_Land_Ocean_Best_Estimate",
+            "Latitude",
+            "Longitude"
+        ]
+        for var in required_vars:
+            if var not in ds.variables:
+                print(f"    Skipping {os.path.basename(path)}: missing variable {var}")
+                return None, None, None, None
+        aod = ds.variables["Aerosol_Optical_Thickness_550_Land_Ocean"][:]
+        aod2 = ds.variables["Aerosol_Optical_Thickness_550_Land_Ocean_Best_Estimate"][:]
         lat = ds.variables["Latitude"][:]
         lon = ds.variables["Longitude"][:]
-    return aod, lat, lon
+    return aod, aod2, lat, lon
 #
 def interpolate_sat_to_model(sat_aod, sat_lat, sat_lon, lat_model, lon_model):
-    if sat_aod.ndim == 3:
-        sat_aod = sat_aod[0, :, :]  # Take first spectral channel
+    #
     # Flatten all inputs
     sat_aod_flat = sat_aod.ravel()
     sat_lat_flat = sat_lat.ravel()
     sat_lon_flat = sat_lon.ravel()
     #
     # Convert invalid values (<0) to NaN
-    sat_aod = np.where(sat_aod < 0, np.nan, sat_aod)
+    sat_aod_flat = np.where(sat_aod_flat < 0, np.nan, sat_aod_flat)
     #
     # Build mask
     mask = np.isfinite(sat_aod_flat) & (~np.isnan(sat_aod_flat))
@@ -105,7 +112,7 @@ for h in range(0, 73):  # hours 0–72
     #
     for vf in matched_files:
         print(f"  Matching VIIRS file: {os.path.basename(vf)}")
-        sat_aod, sat_lat, sat_lon = read_viirs_file(vf)
+        sat_aod, sat_aod2, sat_lat, sat_lon = read_viirs_file(vf)
         if sat_aod is None:
             continue # Skip this file and go to the next one
         #
@@ -123,7 +130,10 @@ for h in range(0, 73):  # hours 0–72
         if interp_aod is None or np.all(np.isnan(interp_aod)):
             print("    Skipping: all VIIRS data missing or invalid")
             continue
-
+        interp_aod2 = interpolate_sat_to_model(sat_aod2, sat_lat, sat_lon, lat_model, lon_model)
+        if interp_aod2 is None or np.all(np.isnan(interp_aod2)):
+            print("    Skipping: all VIIRS data missing or invalid")
+            continue
         # Save interpolated satellite data to NetCDF
         out_file = os.path.join(output_dir, f"viirs_on_model_f{h:03d}_{os.path.basename(vf)}")
         with nc.Dataset(out_file, "w") as ds_out:
@@ -134,10 +144,12 @@ for h in range(0, 73):  # hours 0–72
             lat_out = ds_out.createVariable("lat", "f4", ("grid_yt", "grid_xt"))
             lon_out = ds_out.createVariable("lon", "f4", ("grid_yt", "grid_xt"))
             aod_out = ds_out.createVariable("viirs_aod_interp", "f4", ("grid_yt", "grid_xt"), fill_value=np.nan)
+            aod2_out = ds_out.createVariable("viirs_aod_interp_best_estimate", "f4", ("grid_yt", "grid_xt"), fill_value=np.nan)
             model_aod_out = ds_out.createVariable("model_aod", "f4", ("grid_yt", "grid_xt"), fill_value=np.nan)
             # Write
             lat_out[:] = lat_model
             lon_out[:] = lon_model
             aod_out[:] = interp_aod
+            aod2_out[:] = interp_aod2
             model_aod_out[:] = aod_model
         print(f"    Saved interpolated VIIRS data: {out_file}")
