@@ -6,15 +6,27 @@ import datetime as dt
 from scipy.interpolate import griddata
 from glob import glob
 from sys import exit
+from datetime import datetime
+#
+if len(sys.argv) < 2:
+    print("Usage: python interpolate_to_model.py YYYYMMDD_HH")
+    exit(1)
+#
+# Parse date argument from command line
+start_date_arg = sys.argv[1]  # e.g., "20200816_12"
+year = int(start_date_arg[0:4])
+month = int(start_date_arg[4:6])
+day = int(start_date_arg[6:8])
+hour = int(start_date_arg[9:11])
 #
 # ---------------------------
 # CONFIG
 # ---------------------------
-model_dir = "/glade/campaign/ral/nsap/paddy/NOAA_fire/2020_ensemble_downsampled_data/rave.gfs.nei.CONTROL/20200915_12/"
+model_dir = f"/glade/campaign/ral/nsap/paddy/NOAA_fire/2020_ensemble_downsampled_data/rave.gfs.nei.CONTROL/{start_date_arg}/"
 viirs_dir = "/glade/campaign/acom/acom-weather/pfister/ANALYSIS/MELODIES/viirs/"
-model_init = dt.datetime(2020, 9, 15, 12, 0)
+model_init = dt.datetime(year, month, day, hour, 0)
 time_tolerance = dt.timedelta(minutes=30)  # match VIIRS scan to forecast hour ±30 min
-output_dir = "./viirs_on_model_grid/"
+output_dir = f"./viirs_on_model_grid_{start_date}/"
 os.makedirs(output_dir, exist_ok=True)
 #
 # ---------------------------
