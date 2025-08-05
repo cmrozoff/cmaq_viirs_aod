@@ -28,6 +28,12 @@ def extract_viirs_time(fname):
     hour = int(base[29:31])
     minute = int(base[31:33])
     return dt.datetime(year, 1, 1) + dt.timedelta(days=doy-1, hours=hour, minutes=minute)
+def read_model_file(path):
+    with nc.Dataset(path) as ds:
+        aod = ds.variables["aod"][:].squeeze()  # shape (yt, xt)
+        lat = ds.variables["lat"][:]
+        lon = ds.variables["lon"][:]
+    return aod, lat, lon
 #
 # ---------------------------
 # 1. Collect VIIRS files
@@ -47,5 +53,7 @@ for h in range(0, 73):  # hours 0–72
         continue
     #
     print(f"\nProcessing model forecast hour {h} ({model_time})")
-    
+    #
+    # Read model data
+    aod_model, lat_model, lon_model = read_model_file(model_file)
     exit()
