@@ -26,7 +26,7 @@ model_dir = f"/glade/campaign/ral/nsap/paddy/NOAA_fire/2020_ensemble_downsampled
 viirs_dir = "/glade/campaign/acom/acom-weather/pfister/ANALYSIS/MELODIES/viirs/"
 model_init = dt.datetime(year, month, day, hour, 0)
 time_tolerance = dt.timedelta(minutes=30)  # match VIIRS scan to forecast hour ±30 min
-output_dir = f"./viirs_on_model_grid_{start_date}/"
+output_dir = f"./viirs_on_model_grid/{start_date}/"
 os.makedirs(output_dir, exist_ok=True)
 #
 # ---------------------------
