@@ -5,10 +5,8 @@ import netCDF4 as nc
 import datetime as dt
 from scipy.interpolate import griddata
 from glob import glob
+from sys import exit
 #
-file_viirs='/glade/campaign/acom/acom-weather/pfister/ANALYSIS/MELODIES/viirs/AERDB_L2_VIIRS_SNPP.A2020259.1954.002.2023076071527.nc'
-file_model='/glade/campaign/ral/nsap/paddy/NOAA_fire/2020_ensemble_downsampled_data/rave.gfs.nei.CONTROL/20200915_12/aqm.t12z.phy.f007.nc'
-
 # ---------------------------
 # CONFIG
 # ---------------------------
@@ -30,11 +28,24 @@ def extract_viirs_time(fname):
     hour = int(base[29:31])
     minute = int(base[31:33])
     return dt.datetime(year, 1, 1) + dt.timedelta(days=doy-1, hours=hour, minutes=minute)
-
 #
 # ---------------------------
 # 1. Collect VIIRS files
 # ---------------------------
 viirs_files = sorted(glob(os.path.join(viirs_dir, "AER*SNPP.A2020*.nc")))
 viirs_times = [extract_viirs_time(f) for f in viirs_files]
-print(viirs_times)
+#
+# ---------------------------
+# 2. Loop over model forecast hours
+# ---------------------------
+for h in range(0, 73):  # hours 0–72
+    model_time = model_init + dt.timedelta(hours=h)
+    model_file = os.path.join(model_dir, f"aqm.t12z.phy.f{h:03d}.nc")
+    #
+    if not os.path.exists(model_file):
+        print(f"Skipping missing model file: {model_file}")
+        continue
+    #
+    print(f"\nProcessing model forecast hour {h} ({model_time})")
+    
+    exit()
