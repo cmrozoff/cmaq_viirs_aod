@@ -23,4 +23,15 @@ for fname in all_files:
     if match:
         fhr = match.group(1)
         forecast_groups.setdefault(fhr, []).append(os.path.join(input_dir, fname))
-print(forecast_groups)
+#
+# Reference grid (from any available file)
+reference_file = next((os.path.join(input_dir, f) for f in all_files if f.endswith(".nc")), None)
+if reference_file is None:
+    raise FileNotFoundError("No reference NetCDF file found in input directory.")
+#
+with xr.open_dataset(reference_file) as ref:
+    lat_ref = ref['lat'].values
+    lon_ref = ref['lon'].values
+    shape = lat_ref.shape
+print(lat_ref)
+print(lon_ref)
