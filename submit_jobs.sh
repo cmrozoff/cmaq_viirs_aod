@@ -1,10 +1,9 @@
 #!/bin/bash
 
 # ===== USER CONFIG =====
-PYTHON_SCRIPT="/glade/work/rozoff/fire/viirs/interpolate_to_model.py"
-START_DATE=20200818
-END_DATE=20200930
-#END_DATE=20200817
+PYTHON_SCRIPT="/glade/work/rozoff/fire/viirs/dt_interpolate_to_model.py"
+START_DATE=20200815
+END_DATE=20200815
 BATCH_SIZE_DAYS=5
 INIT_HOUR=12
 
