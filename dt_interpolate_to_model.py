@@ -59,13 +59,13 @@ def read_viirs_file(path):
             "Latitude",
             "Longitude"
         ]
-        for var in required_vars:
-            if var not in ds.variables:
-                print(f"    Skipping {os.path.basename(path)}: missing variable {var}")
-                return None, None, None
-        aod = ds.variables["Optical_Depth_Land_And_Ocean"][:]
-        lat = ds.variables["Latitude"][:]
-        lon = ds.variables["Longitude"][:]
+        #for var in required_vars:
+        #    if var not in ds.variables:
+        #        print(f"    Skipping {os.path.basename(path)}: missing variable {var}")
+        #        return None, None, None
+        aod = ds.groups['geophysical_data'].variables["Optical_Depth_Land_And_Ocean"][:]
+        lat = ds.groups['geolocation_data'].variables["latitude"][:]
+        lon = ds.groups['geolocation_data'].variables["longitude"][:]
     return aod, lat, lon
 #
 def interpolate_sat_to_model(sat_aod, sat_lat, sat_lon, lat_model, lon_model):
