@@ -2,6 +2,7 @@ import os
 import re
 import numpy as np
 import xarray as xr
+from sys import exit
 #
 # === USER CONFIGURATION ===
 start_date_arg = "20200815_12"
@@ -33,5 +34,9 @@ with xr.open_dataset(reference_file) as ref:
     lat_ref = ref['lat'].values
     lon_ref = ref['lon'].values
     shape = lat_ref.shape
-print(lat_ref)
-print(lon_ref)
+#
+for fhr in forecast_hours:
+    files = forecast_groups.get(fhr, [])
+    print(f"Processing forecast hour {fhr} with {len(files)} file(s)...")
+
+    exit()
