@@ -45,6 +45,10 @@ while current_date <= end_date:
         print(f"Processing forecast hour {fhr} ...")
         file_in = f"viirs_model.{fhr}.nc"
         in_path = os.path.join(ref_dir, file_in)
-        print(in_path)
+        with xr.open_dataset(in_path) as ds:
+            model_aod = ds['model_aod'].values
+            satel_aod = ds['viirs_aod_interp'].values
+        print(model_aod)
+        print(satel_aod)
         exit()
     current_date += timedelta(days=1)
