@@ -43,7 +43,9 @@ for fhr in forecast_hours:
     out_name = os.path.join(output_dir, outfile)
     #
     if len(files) == 1:
-        # Copy file to output
-        os.system(f"cp {files[0]} {out_name}")
-        continue
+        with xr.open_dataset(files[0]) as ds:
+            lat = ds['lat'].values
+            lon = ds['lon'].values
+            model_aod = ds['model_aod'].values
+            viirs_aod_interp = ds['viirs_aod_interp'].values
     exit()
