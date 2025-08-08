@@ -43,4 +43,8 @@ while current_date <= end_date:
     print(current_date)
     for fhr in forecast_hours:
         print(f"Processing forecast hour {fhr} ...")
+        file_in = f"viirs_model.{fhr}.nc"
+        in_path = os.path.join(ref_dir, file_in)
+        print(in_path)
+        exit()
     current_date += timedelta(days=1)
