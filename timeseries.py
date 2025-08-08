@@ -38,6 +38,17 @@ with xr.open_dataset(reference_file) as ref:
 # Forecast hours to loop over
 forecast_hours = [f"f{str(i).zfill(3)}" for i in range(73)]
 #
+# Get EPA regions
+file_in ('regions/region' + str(10) + '.nc')
+# Open region file
+if os.path.isfile(file_in):
+    print(f"Processing file: {file_in}")
+    with xr.open_dataset(file_in) as epr:
+        #
+        within_states_flat = epr['within_states_flat']
+    #
+    mask = within_states_flat == 1
+
 while current_date <= end_date:
     #
     print(current_date)
