@@ -38,5 +38,12 @@ with xr.open_dataset(reference_file) as ref:
 for fhr in forecast_hours:
     files = forecast_groups.get(fhr, [])
     print(f"Processing forecast hour {fhr} with {len(files)} file(s)...")
-
+    #
+    outfile = f"viirs_model.{fhr}.nc"
+    out_name = os.path.join(output_dir, outfile)
+    #
+    if len(files) == 1:
+        # Copy file to output
+        os.system(f"cp {files[0]} {out_name}")
+        continue
     exit()
