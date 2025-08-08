@@ -39,13 +39,42 @@ for fhr in forecast_hours:
     files = forecast_groups.get(fhr, [])
     print(f"Processing forecast hour {fhr} with {len(files)} file(s)...")
     #
-    outfile = f"viirs_model.{fhr}.nc"
-    out_name = os.path.join(output_dir, outfile)
-    #
     if len(files) == 1:
         with xr.open_dataset(files[0]) as ds:
             lat = ds['lat'].values
             lon = ds['lon'].values
             model_aod = ds['model_aod'].values
             viirs_aod_interp = ds['viirs_aod_interp'].values
-    exit()
+    elif len(files) > 1:
+        # Merge multiple files
+        with xr.open_dataset(files[0]) as ds_base:
+            model_aod = ds_base['model_aod'].values
+        #
+        viirs_aod_interp = np.full(shape, np.nan, dtype = np.float32)
+        #
+        for f in files:
+            with xr.open_dataset(f) as ds:
+                interp = ds['viirs_aod_interp'].values
+                #
+                mask_interp = ~np.isnan(interp)
+                viirs_aod_interp[mask_interp] = interp[mask_interp]
+
+    else:
+        # No files → fill all with NaNs
+        model_aod = np.full(shape, np.nan, dtype=np.float32)
+        viirs_aod_interp = np.full(shape, np.nan, dtype=np.float32)
+    # Build merged dataset
+    merged_ds = xr.Dataset(
+        {
+            "lat": (("grid_yt", "grid_xt"), lat_ref),
+            "lon": (("grid_yt", "grid_xt"), lon_ref),
+            "model_aod": (("grid_yt", "grid_xt"), model_aod),
+            "viirs_aod_interp": (("grid_yt", "grid_xt"), viirs_aod_interp),
+        }
+    )
+
+    # Save output file with requested naming
+    out_name = f"viirs_model.{fhr}.nc"
+    out_path = os.path.join(output_dir, out_name)
+    merged_ds.to_netcdf(out_path)
+    print(f"Saved: {out_path}")
