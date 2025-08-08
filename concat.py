@@ -3,9 +3,22 @@ import re
 import numpy as np
 import xarray as xr
 from sys import exit
+import sys
+#
+if len(sys.argv) < 2:
+    print("Usage: python interpolate_to_model.py YYYYMMDD_HH")
+    sys.exit(1)
+#
+# Parse date argument from command line
+start_date_arg = sys.argv[1]  # e.g., "20200816_12"
+year = int(start_date_arg[0:4])
+month = int(start_date_arg[4:6])
+day = int(start_date_arg[6:8])
+hour = int(start_date_arg[9:11])
+
 #
 # === USER CONFIGURATION ===
-start_date_arg = "20200815_12"
+#start_date_arg = "20200815_12"
 input_dir = f"/glade/work/rozoff/fire/viirs/viirs_on_model_grid/{start_date_arg}"
 output_dir = f"/glade/work/rozoff/fire/viirs/model_structure/{start_date_arg}"
 os.makedirs(output_dir, exist_ok=True)
